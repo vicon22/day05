@@ -88,7 +88,8 @@ public class Message {
                 ",\nauthor=" + author +
                 ",\nchatroom=" + chatroom +
                 ",\ntext='" + text + '\'' +
-                ",\nmessageDateTime=" + messageDateTime +
+                ",\ndateTime=" + messageDateTime.toLocalDate() +
+                " " + messageDateTime.toLocalTime() +
                 '}';
     }
 }

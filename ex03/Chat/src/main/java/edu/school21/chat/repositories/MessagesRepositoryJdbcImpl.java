@@ -15,7 +15,7 @@ public class MessagesRepositoryJdbcImpl implements MessagesRepository {
     private DataSource dataSource;
     private String QUERY_TEMPLATE = "SELECT * FROM chat.messages WHERE message_id=?";
     private String SAVE_QUERY_TEMPLATE = "INSERT INTO chat.messages (message_author, message_room, message_text, message_date) VALUES (?,?,?,?) RETURNING *";
-    private String UPDATE_QUERY_TEMPLATE = "UPDATE chat.messages SET message_author = ?, message_room = ?, message_text = ?, message_date = ? WHERE message_id = ? RETURNING *;";
+    private String UPDATE_QUERY_TEMPLATE = "UPDATE chat.messages SET message_author = ?, message_room = ?, message_text = ?, message_date = ? WHERE message_id = ? RETURNING *";
     private String FIND_ALL_QUERY_TEMPLATE = "SELECT * FROM chat.messages" +
             " JOIN chat.users ON user_id = message_author" +
             " JOIN chat.chatrooms ON chatroom_id = message_room";
@@ -94,10 +94,6 @@ public class MessagesRepositoryJdbcImpl implements MessagesRepository {
         ResultSet resultSet = null;
         Connection connection;
 
-
-        if (findById(message.getId()).isEmpty()) {
-            throw new NotSavedSubEntityException("Message with id=" + message.getId() + " not found");
-        }
         try {
             connection = dataSource.getConnection();
             PreparedStatement query = connection.prepareStatement(UPDATE_QUERY_TEMPLATE);
@@ -106,9 +102,7 @@ public class MessagesRepositoryJdbcImpl implements MessagesRepository {
             query.setString(3, message.getText());
             query.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             query.setLong(5, message.getId());
-            resultSet = query.executeQuery();
-            resultSet.next();
-            message.setId(resultSet.getLong("message_id"));
+            query.executeQuery();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

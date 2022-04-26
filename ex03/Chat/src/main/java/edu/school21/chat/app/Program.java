@@ -25,18 +25,15 @@ public class Program {
 //        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/data.sql";
         final String DB_SCHEMA = "src/main/resources/schema.sql";
         final String DB_DATA = "src/main/resources/data.sql";
-        Connection connection;
+
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(URL);
         dataSource.setUsername(USER_NAME);
         dataSource.setPassword(PASSWORD);
+        dataSource.addDataSourceProperty("cachePrepStmts", "true");
+        dataSource.addDataSourceProperty("prepStmtCacheSize", "250");
+        dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 
-        try {
-            connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
         runQueriesFromFile(dataSource.getConnection(), DB_SCHEMA);
         runQueriesFromFile(dataSource.getConnection(), DB_DATA);
 
@@ -44,18 +41,16 @@ public class Program {
         ChatroomsRepository chatroomsRepository = new ChatroomsRepositoryJdbcImpl(dataSource, usersRepository);
         MessagesRepository messagesRepository = new MessagesRepositoryJdbcImpl(dataSource,usersRepository,chatroomsRepository);
 
+
+        check(dataSource.getConnection());
         System.out.println("-----------------------------------");
         Message message = messagesRepository.findById(1L).orElse(null);
         System.out.println(message);
         System.out.println("-----------------------------------");
 
-        assert message != null;
         message.setText("update");
         messagesRepository.update(message);
         System.out.println("-----------------------------------");
-        message = messagesRepository.findById(1L).orElse(null);
-        System.out.println(message);
-
     }
 
     private static void check(Connection connection) throws SQLException{

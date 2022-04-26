@@ -1,15 +1,11 @@
 package edu.school21.chat.app;
 
 import com.zaxxer.hikari.HikariDataSource;
-import edu.school21.chat.models.Message;
 import edu.school21.chat.repositories.*;
-
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
-import java.util.List;
 import java.util.Scanner;
 
 public class Program {
@@ -33,12 +29,6 @@ public class Program {
         dataSource.setUsername(USER_NAME);
         dataSource.setPassword(PASSWORD);
 
-        try {
-            connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
         runQueriesFromFile(dataSource.getConnection(), DB_SCHEMA);
         runQueriesFromFile(dataSource.getConnection(), DB_DATA);
 
