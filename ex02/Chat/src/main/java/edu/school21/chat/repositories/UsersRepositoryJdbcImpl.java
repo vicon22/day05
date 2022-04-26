@@ -2,16 +2,17 @@ package edu.school21.chat.repositories;
 
 import edu.school21.chat.models.User;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
 
 public class UsersRepositoryJdbcImpl implements UsersRepository {
 
-    private Connection connection;
+    private DataSource dataSource;
     private String QUERY_TEMPLATE = "SELECT * FROM chat.users WHERE user_id=";
 
-    public UsersRepositoryJdbcImpl(Connection connection) {
-        this.connection = connection;
+    public UsersRepositoryJdbcImpl(DataSource dataSource) {
+        this. dataSource =  dataSource;
     }
 
     @Override
@@ -20,7 +21,9 @@ public class UsersRepositoryJdbcImpl implements UsersRepository {
         User ret = null;
         ResultSet resultSet = null;
         Statement statement;
+        Connection connection;
         try {
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -40,7 +43,7 @@ public class UsersRepositoryJdbcImpl implements UsersRepository {
                         resultSet.getString("user_password"),
                         null,
                         null
-                        );
+                );
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();

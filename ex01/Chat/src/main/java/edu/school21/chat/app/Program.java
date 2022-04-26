@@ -1,12 +1,15 @@
 package edu.school21.chat.app;
 
+import com.zaxxer.hikari.HikariDataSource;
 import edu.school21.chat.models.Message;
 import edu.school21.chat.repositories.*;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Program {
@@ -20,9 +23,15 @@ public class Program {
         final String USER_NAME = "postgres";
         final String PASSWORD = "postgres";
         final String URL = "jdbc:postgresql://localhost/postgres";
-        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/schema.sql";
-        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/data.sql";
+//        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/schema.sql";
+//        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/data.sql";
+        final String DB_SCHEMA = "src/main/resources/schema.sql";
+        final String DB_DATA = "src/main/resources/data.sql";
         Connection connection;
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(URL);
+        dataSource.setUsername(USER_NAME);
+        dataSource.setPassword(PASSWORD);
 
         try {
             connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
@@ -30,26 +39,16 @@ public class Program {
             e.printStackTrace();
             throw new RuntimeException();
         }
-        runQueriesFromFile(connection, DB_SCHEMA);
-        runQueriesFromFile(connection, DB_DATA);
+        runQueriesFromFile(dataSource.getConnection(), DB_SCHEMA);
+        runQueriesFromFile(dataSource.getConnection(), DB_DATA);
 
-        UsersRepository usersRepository = new UsersRepositoryJdbcImpl(connection);
-        ChatroomsRepository chatroomsRepository = new ChatroomsRepositoryJdbcImpl(connection, usersRepository);
-        MessagesRepository messagesRepository = new MessagesRepositoryJdbcImpl(connection,usersRepository,chatroomsRepository);
+        UsersRepository usersRepository = new UsersRepositoryJdbcImpl(dataSource);
+        ChatroomsRepository chatroomsRepository = new ChatroomsRepositoryJdbcImpl(dataSource, usersRepository);
+        MessagesRepository messagesRepository = new MessagesRepositoryJdbcImpl(dataSource,usersRepository,chatroomsRepository);
 
 
-        //System.out.println("Put message_id:");
-        //System.out.println(messagesRepository.findById(scanner.nextLong()).orElse(null));
-        check(connection);
-        System.out.println("-----------------------------------");
-
-        Message message = new Message(usersRepository.findById(1L).orElse(null), chatroomsRepository.findById(1L).orElse(null), "This message has to be saved");
-
-        messagesRepository.save(message);
-
-        check(connection);
-        System.out.println("-----------------------------------");
-        System.out.println(message.getId());
+        System.out.println("Put message_id:");
+        System.out.println(messagesRepository.findById(scanner.nextLong()).orElse(null));
 
     }
 
@@ -63,10 +62,6 @@ public class Program {
             throw new RuntimeException();
         }
 
-//        ResultSet resultSet = statement.executeQuery( "SELECT * FROM chat.users");
-//        while (resultSet.next()) {
-//            System.out.println(resultSet.getString("user_id") + " " + resultSet.getString("user_login") + " " + resultSet.getString("user_password") + " " + resultSet.getString("created_rooms"));
-//        }
         ResultSet resultSet = statement.executeQuery( "SELECT * FROM chat.messages");
         while (resultSet.next()) {
             System.out.println(resultSet.getString("message_id") + " " + resultSet.getInt("message_author") + " " + resultSet.getInt("message_room") + " " + resultSet.getTimestamp("message_date"));

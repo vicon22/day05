@@ -14,8 +14,10 @@ public class Program {
         final String USER_NAME = "postgres";
         final String PASSWORD = "postgres";
         final String URL = "jdbc:postgresql://localhost/postgres";
-        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex00/Chat/src/main/resources/schema.sql";
-        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex00/Chat/src/main/resources/data.sql";
+//        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex00/Chat/src/main/resources/schema.sql";
+//        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex00/Chat/src/main/resources/data.sql";
+        final String DB_SCHEMA = "src/main/resources/schema.sql";
+        final String DB_DATA = "src/main/resources/data.sql";
         Statement statement;
         Connection connection;
 
@@ -31,10 +33,12 @@ public class Program {
             e.printStackTrace();
             throw new RuntimeException();
         }
+
         runQueriesFromFile(connection, DB_SCHEMA);
         runQueriesFromFile(connection, DB_DATA);
         check(statement);
     }
+
 
     private static void check(Statement statement) throws SQLException{
 

@@ -85,10 +85,10 @@ public class Message {
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                ", author=" + author +
-                ", chatroom=" + chatroom +
-                ", text='" + text + '\'' +
-                ", messageDateTime=" + messageDateTime +
+                ",\nauthor=" + author +
+                ",\nchatroom=" + chatroom +
+                ",\ntext='" + text + '\'' +
+                ",\nmessageDateTime=" + messageDateTime +
                 '}';
     }
 }

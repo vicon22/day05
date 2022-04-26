@@ -3,17 +3,18 @@ package edu.school21.chat.repositories;
 import edu.school21.chat.models.Chatroom;
 import edu.school21.chat.models.User;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
 
 public class ChatroomsRepositoryJdbcImpl implements ChatroomsRepository {
 
-    private Connection connection;
+    private DataSource dataSource;
     private String QUERY_TEMPLATE = "SELECT * FROM chat.chatrooms WHERE chatroom_id=?";
     private UsersRepository usersRepository;
 
-    public ChatroomsRepositoryJdbcImpl(Connection connection, UsersRepository usersRepository) {
-        this.connection = connection;
+    public ChatroomsRepositoryJdbcImpl(DataSource dataSource, UsersRepository usersRepository) {
+        this.dataSource = dataSource;
         this.usersRepository = usersRepository;
     }
 
@@ -23,7 +24,9 @@ public class ChatroomsRepositoryJdbcImpl implements ChatroomsRepository {
         Chatroom ret = null;
         ResultSet resultSet = null;
         Statement statement;
+        Connection connection;
         try {
+            connection = dataSource.getConnection();
             statement = connection.createStatement();
         } catch (SQLException e) {
             e.printStackTrace();

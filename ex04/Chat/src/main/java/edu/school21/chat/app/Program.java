@@ -1,5 +1,6 @@
 package edu.school21.chat.app;
 
+import com.zaxxer.hikari.HikariDataSource;
 import edu.school21.chat.models.Message;
 import edu.school21.chat.repositories.*;
 
@@ -7,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Program {
@@ -20,9 +22,15 @@ public class Program {
         final String USER_NAME = "postgres";
         final String PASSWORD = "postgres";
         final String URL = "jdbc:postgresql://localhost/postgres";
-        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex02/Chat/src/main/resources/schema.sql";
-        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex02/Chat/src/main/resources/data.sql";
+//        final String DB_SCHEMA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/schema.sql";
+//        final String DB_DATA = "/Users/eveiled/Desktop/day05/ex01/Chat/src/main/resources/data.sql";
+        final String DB_SCHEMA = "src/main/resources/schema.sql";
+        final String DB_DATA = "src/main/resources/data.sql";
         Connection connection;
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(URL);
+        dataSource.setUsername(USER_NAME);
+        dataSource.setPassword(PASSWORD);
 
         try {
             connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
@@ -30,24 +38,17 @@ public class Program {
             e.printStackTrace();
             throw new RuntimeException();
         }
-        runQueriesFromFile(connection, DB_SCHEMA);
-        runQueriesFromFile(connection, DB_DATA);
+        runQueriesFromFile(dataSource.getConnection(), DB_SCHEMA);
+        runQueriesFromFile(dataSource.getConnection(), DB_DATA);
 
-        UsersRepository usersRepository = new UsersRepositoryJdbcImpl(connection);
-        ChatroomsRepository chatroomsRepository = new ChatroomsRepositoryJdbcImpl(connection, usersRepository);
-        MessagesRepository messagesRepository = new MessagesRepositoryJdbcImpl(connection,usersRepository,chatroomsRepository);
+        UsersRepository usersRepository = new UsersRepositoryJdbcImpl(dataSource);
+        ChatroomsRepository chatroomsRepository = new ChatroomsRepositoryJdbcImpl(dataSource, usersRepository);
+        MessagesRepository messagesRepository = new MessagesRepositoryJdbcImpl(dataSource,usersRepository,chatroomsRepository);
 
-        System.out.println("-----------------------------------");
-        Message message = messagesRepository.findById(1L).orElse(null);
-        System.out.println(message);
-        System.out.println("-----------------------------------");
 
-        assert message != null;
-        message.setText("update");
-        messagesRepository.update(message);
-        System.out.println("-----------------------------------");
-        message = messagesRepository.findById(1L).orElse(null);
-        System.out.println(message);
+
+        List<Message> messageList = messagesRepository.findAll(2,2);
+        messageList.forEach(System.out::println);
 
     }
 
